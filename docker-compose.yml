@@ -1,0 +1,20 @@
+services:
+  trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rsna-knee-fusion:latest
+    env_file:
+      - .env
+    environment:
+      KAGGLE_COMPETITION: ${KAGGLE_COMPETITION:-rsna-knee-abnormality-detection}
+      TRAIN_MODE: ${TRAIN_MODE:-train}
+    volumes:
+      - ./data:/app/data
+      - ./weights:/app/weights
+      - ./outputs:/app/outputs
+    gpus: all
+    shm_size: 8gb
+    init: true
+    stdin_open: true
+    tty: true

@@ -1,0 +1,106 @@
+paths:
+  data_dir: data
+  cache_dir: data/cache
+  train_csv: data/train.csv
+  test_csv: data/test.csv
+  train_series_csv: data/train_series.csv
+  test_series_csv: data/test_series.csv
+  sample_submission_csv: data/sample_submission.csv
+  labels_csv: data/llm_labels_v4_blend.csv
+  sam_base_checkpoint: weights/pretrained/sam_vit_b_01ec64.pth
+  external_knee_checkpoint: weights/checkpoints/knee/m_f{fold}.pt
+  external_sam_checkpoint: weights/checkpoints/sam/submissions_epoch_8_step_11550
+  checkpoints_dir: weights/checkpoints
+  outputs_dir: outputs
+
+data:
+  n_folds: 5
+  folds: [0, 1, 2, 3, 4]
+  image_size: 336
+  crop_mm: 130.0
+  max_slices_per_slot: 16
+  slice_band: [0.12, 0.88]
+  gold_weight: 8.0
+  silent_value: 0.25
+  silent_weight: 0.05
+  workers: 4
+  cache_schema_version: 1
+
+knee:
+  enabled: true
+  backbone: vit_small_patch16_dinov3.lvd1689m
+  cond: token
+  pool: xcodex
+  stem: native
+  n_slice: 16
+  n_meta: 0
+  img: 336
+  norm: none
+  slices_per_slot: 16
+  trainable_blocks: 4
+  gradient_checkpointing: false
+  epochs: 12
+  batch_size: 4
+  lr: 0.0001
+  weight_decay: 0.0001
+  gradient_accumulation: 1
+  gradient_clip: 1.0
+  scheduler: cosine
+
+sam:
+  enabled: true
+  model_type: vit_b
+  feature_dim: 256
+  input_size: 512
+  encode_chunk: 6
+  trainable_blocks: 2
+  gradient_checkpointing: false
+  slices_per_slot: 2
+  epochs: 8
+  batch_size: 1
+  lr: 0.00002
+  weight_decay: 0.0001
+  gradient_accumulation: 1
+  gradient_clip: 1.0
+  scheduler: cosine
+
+fusion:
+  enabled: true
+  fusion_dim: 256
+  decoder_layers: 2
+  attention_heads: 8
+  feedforward_dim: 1024
+  dropout: 0.2
+  epochs: 8
+  batch_size: 1
+  lr: 0.00001
+  weight_decay: 0.0001
+  gradient_accumulation: 8
+  gradient_clip: 1.0
+  scheduler: cosine
+
+checkpoint:
+  strict: true
+  knee:
+    resume: auto
+    path: null
+    initialize: external
+  sam:
+    resume: auto
+    path: null
+    initialize: external
+  fusion:
+    resume: auto
+    path: null
+    initialize: external
+
+ensemble:
+  kind: rank
+  sam_weight: 0.3
+
+runtime:
+  device: auto
+  seed: 2026
+  deterministic: true
+  precision: amp
+  pin_memory: true
