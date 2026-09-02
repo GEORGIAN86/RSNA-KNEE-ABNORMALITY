@@ -19,6 +19,7 @@ import yaml
 from torch.utils.data import DataLoader
 
 from Helpers.cache import build_cache_split, cache_fingerprint
+from Loss import weighted_bce
 from Models.DINOv3Knee import build_dinov3_knee_model
 from Models.FusionModel import build_fusion_model
 from Models.SAMClassifier import build_sam_model, parameter_counts
@@ -61,7 +62,6 @@ from Training.trainer import (
     predict_loader,
     train_fold,
     train_global,
-    weighted_bce,
 )
 from Validators.test_validator import validate_submission
 from Validators.validator import (

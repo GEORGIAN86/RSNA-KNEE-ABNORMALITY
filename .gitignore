@@ -3,7 +3,9 @@
 __pycache__/
 .pytest_cache/
 .worktrees/
+.kaggle/
 *.pyc
 data/cache/
 outputs/
+outputs/kaggle/
 weights.zip

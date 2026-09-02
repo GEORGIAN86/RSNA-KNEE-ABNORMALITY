@@ -24,13 +24,13 @@ def test_docker_image_and_compose_define_gpu_training_runtime():
 def test_secret_and_large_runtime_data_are_excluded_from_image_and_git():
     dockerignore = (ROOT / ".dockerignore").read_text().splitlines()
     gitignore = (ROOT / ".gitignore").read_text().splitlines()
-    env = (ROOT / ".env").read_text()
+    env_example = (ROOT / ".env.example").read_text()
 
     for name in (".env", "data", "weights", "outputs"):
         assert name in dockerignore
     assert ".env" in gitignore
-    assert "KAGGLE_API_TOKEN=" in env
-    assert env.split("KAGGLE_API_TOKEN=", 1)[1].splitlines()[0] == ""
+    assert "KAGGLE_API_TOKEN=" in env_example
+    assert env_example.split("KAGGLE_API_TOKEN=", 1)[1].splitlines()[0] == ""
 
 
 def test_production_config_uses_canonical_download_paths():

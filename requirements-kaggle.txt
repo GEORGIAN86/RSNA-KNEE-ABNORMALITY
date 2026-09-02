@@ -1,0 +1,8 @@
+transformers
+timm>=1.0.20,<2
+segment-anything
+pydicom
+opencv-python-headless
+PyYAML
+scikit-learn
+tqdm

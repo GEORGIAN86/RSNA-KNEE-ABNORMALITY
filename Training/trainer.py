@@ -10,9 +10,10 @@ from typing import Any
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from sklearn.metrics import roc_auc_score
+
+from Loss import weighted_bce
 
 from .checkpoints import architecture_fingerprint, load_checkpoint, save_checkpoint
 
@@ -54,16 +55,6 @@ def macro_auc(
         "macro_auc": float(np.mean(finite)) if finite else float("nan"),
         "per_label_auc": per_label,
     }
-
-
-def weighted_bce(logits: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
-    if logits.shape != targets.shape or targets.shape != weights.shape:
-        raise ValueError("logits, targets, and weights must have identical shapes")
-    losses = F.binary_cross_entropy_with_logits(logits, targets, reduction="none")
-    denominator = weights.sum()
-    if denominator.item() <= 0:
-        raise ValueError("at least one target weight must be positive")
-    return (losses * weights).sum() / denominator
 
 
 def _to_device(batch: dict[str, Any], device: torch.device) -> dict[str, Any]:

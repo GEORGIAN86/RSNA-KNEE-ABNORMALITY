@@ -47,6 +47,76 @@ Or use a normal virtual environment:
 python -m pip install -r requirements.txt
 ```
 
+## One-command Kaggle GPU training
+
+The Kaggle launcher packages this project, creates or reuses two private input
+datasets, submits a private GPU script, waits for it to finish, and downloads
+the resulting checkpoints and predictions. It does not require Docker or a
+local NVIDIA GPU.
+
+Install the current Kaggle CLI if it is not already available:
+
+```bash
+python -m pip install "kaggle>=2,<3"
+```
+
+Accept the competition rules on Kaggle, copy the environment template, and set
+both your non-interactive API token and Kaggle account URL slug:
+
+```bash
+cp .env.example .env
+```
+
+```dotenv
+KAGGLE_API_TOKEN=your-token
+KAGGLE_USERNAME=your-username-slug
+```
+
+Submit the complete adaptive training and prediction workflow:
+
+```bash
+python scripts/kaggle_train.py
+```
+
+The first run uploads `weights.zip` (approximately 941 MB) to a private weights
+dataset and uploads a separate small private source dataset. Later runs compare
+content manifests and reuse either dataset when it is unchanged. Credentials,
+raw DICOM data, local outputs, and Git metadata are never included in these
+uploads.
+
+The remote script attaches the competition data directly, uses an NVIDIA T4,
+and enables internet access to install the non-PyTorch dependencies in
+`requirements-kaggle.txt`. Pretrained weights and preprocessing caches stay in
+Kaggle scratch storage. Fusion checkpoints, resource reports, metrics, fold
+predictions, and `submission.csv` are saved as kernel output and downloaded to
+a new timestamped directory under `outputs/kaggle/`.
+
+To test a single fold before committing quota to all five folds:
+
+```bash
+python scripts/kaggle_train.py --folds 0
+```
+
+To submit without waiting or downloading:
+
+```bash
+python scripts/kaggle_train.py --no-wait
+```
+
+The launcher prints the private kernel URL. Inspect or retrieve an asynchronous
+run later with:
+
+```bash
+kaggle kernels status YOUR_USERNAME/rsna-knee-training
+kaggle kernels output YOUR_USERNAME/rsna-knee-training -p outputs/kaggle/manual
+```
+
+Use `--poll-seconds`, `--timeout-seconds`, `--accelerator`, or `--output-dir`
+to override runtime defaults. A local wait timeout does not cancel the remote
+job. Kaggle GPU quota and maximum session duration still apply; training all
+five folds may require more than one session, so start with `--folds 0` to
+measure the actual runtime on your account.
+
 Place the five supplied knee checkpoints at `weights/checkpoints/knee/m_f0.pt`
 through `m_f4.pt`, and the extracted SAM checkpoint at the path configured by
 `paths.external_sam_checkpoint`. The external SAM state includes the full

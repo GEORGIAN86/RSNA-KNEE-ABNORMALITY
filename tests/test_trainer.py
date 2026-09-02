@@ -6,17 +6,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from Training.checkpoints import CheckpointError
-from Training.trainer import train_fold, train_global, weighted_bce
-
-
-def test_weighted_bce_applies_cell_weights():
-    logits = torch.zeros(1, 2)
-    targets = torch.tensor([[1.0, 0.0]])
-    weights = torch.tensor([[2.0, 0.0]])
-
-    loss = weighted_bce(logits, targets, weights)
-
-    assert loss.item() == pytest.approx(0.693147, abs=1e-5)
+from Training.trainer import train_fold, train_global
 
 
 class TinyDataset(Dataset):
